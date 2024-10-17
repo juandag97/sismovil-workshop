@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'package:provider/provider.dart';
 import 'theme_provider.dart';
 
 void main() async {
   // Load the .env file
-  // await dotenv.load(fileName: "../.env");
+  await dotenv.load(fileName: "assets/.env");
   runApp(
     ChangeNotifierProvider(
       create: (_) => ThemeProvider(),
@@ -44,8 +45,7 @@ class _ChatPageState extends State<ChatPage> {
   bool _isLoading = false;
 
   // Reemplaza con tu API key de OpenAI
-  final String apiKey = 'YOUR-API-KEY';
-  // final String apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
+  final String apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
   Future<void> _sendMessage(String message) async {
     setState(() {
       _messages.add({'sender': 'user', 'text': message});
@@ -66,21 +66,21 @@ class _ChatPageState extends State<ChatPage> {
     final response = await http.post(
       Uri.parse(apiUrl),
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
         'Authorization': 'Bearer $apiKey',
       },
-      body: json.encode({
+      body: utf8.encode(json.encode({
         'model': 'gpt-3.5-turbo',
         'messages': [
           {'role': 'system', 'content': 'You are a helpful assistant.'},
           {'role': 'user', 'content': message},
         ],
         'max_tokens': 100,
-      }),
+      })),
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      final data = json.decode(utf8.decode(response.bodyBytes));
       final reply = data['choices'][0]['message']['content'];
       return reply.trim();
     } else {
@@ -124,7 +124,8 @@ class _ChatPageState extends State<ChatPage> {
           ),
           if (_isLoading) CircularProgressIndicator(),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.fromLTRB(
+                20.0, 12.0, 20.0, 20.0), // Further increased padding
             child: Row(
               children: [
                 Expanded(
@@ -132,9 +133,18 @@ class _ChatPageState extends State<ChatPage> {
                     controller: _controller,
                     decoration: InputDecoration(
                       hintText: 'Escribe tu mensaje...',
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 20.0,
+                          vertical: 16.0), // Increased padding inside TextField
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ), // Added rounded border for a more spacious appearance
                     ),
                   ),
                 ),
+                SizedBox(
+                    width:
+                        16), // Increased spacing between TextField and IconButton
                 IconButton(
                   icon: Icon(Icons.send),
                   onPressed: () {
