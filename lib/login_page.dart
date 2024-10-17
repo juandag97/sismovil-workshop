@@ -19,7 +19,8 @@ class _LoginPageState extends State<LoginPage> {
       final password = _passwordController.text;
 
       try {
-        final isAuthenticated = await DatabaseHelper.instance.authenticateUser(username, password);
+        final isAuthenticated =
+            await DatabaseHelper.instance.authenticateUser(username, password);
 
         if (isAuthenticated) {
           Navigator.of(context).pushReplacement(
@@ -41,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
+      appBar: AppBar(title: Text('Login Sismovil Chat')),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Form(
